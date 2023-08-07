@@ -166,8 +166,10 @@ def dataAi():
             feature_columns.append(one_hot)
     st.header("")
     st.subheader("신경망 모델 생성하기")
-    레이어개수 = st.number_input("신경망 레이어 개수 선택", step=1 ,value=3)
-
+    신경망col = st.columns(3)
+    레이어개수 = 신경망col[0].number_input("신경망 레이어 개수 선택", step=1 ,value=3)
+    손실함수 = 신경망col[1].selectbox("손실함수 선택", ['mean_squared_error', 'binary_crossentropy'])
+    학습횟수 = 신경망col[2].number_input("학습 횟수 선택", step=1, value=10)
     컬럼 = st.columns(레이어개수)
     레이어 = []
     레이어.append(tf.keras.layers.DenseFeatures(feature_columns))
@@ -179,17 +181,17 @@ def dataAi():
             노드개수 = 컬럼[i].selectbox("노드 개수 선택", [128,64,32], key='노드개수'+str(i))
             활성함수 = 컬럼[i].radio("활성함수 선택",['sigmoid', 'tanh', 'relu'], key='활성함수'+str(i), horizontal=True)
         레이어.append(tf.keras.layers.Dense(노드개수, activation=활성함수))
+
     model = tf.keras.Sequential(레이어)
 
 
 
-    손실함수 = st.selectbox("손실함수 선택", ['mean_squared_error', 'binary_crossentropy'])
     model.compile(optimizer='adam', loss=손실함수, metrics=['acc'])
 
     ds_batch = ds.batch(32)
     btn = st.button('학습시작')
     if btn:
-        history = model.fit(ds_batch, shuffle = True, epochs=20)
+        history = model.fit(ds_batch, shuffle = True, epochs=학습횟수)
 
         plt.rc('font', family='NanumGothic')
         fig, ax = plt.subplots()
