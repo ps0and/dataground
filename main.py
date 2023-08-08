@@ -8,11 +8,11 @@ from matplotlib.ticker import MaxNLocator
 import tensorflow as tf
 
 
-
-
 def unique(list):
     x = np.array(list)
     return np.unique(x)
+
+
 @st.cache_data
 def fontRegistered():
     font_dirs = [os.getcwd() + '/customFonts']
@@ -22,17 +22,21 @@ def fontRegistered():
         fm.fontManager.addfont(font_file)
     fm._load_fontmanager(try_read_cache=False)
 
+
 def dataVisualization():
     st.header('⚽데이터 운동장')
     st.subheader("1. 데이터 올리기")
-
-    데이터선택 = st.selectbox("데이터 선택", ['인구(kosis)','기상관측(기상자료개방포털)','장애인건강검진(kosis)','청소년흡연(kosis)','타이타닉(kaggle)', '파일 올리기'])
+    데이터선택 = st.selectbox("데이터 선택",
+                         ['인구(kosis)', '기상관측(기상자료개방포털)', '장애인건강검진(kosis)', '청소년흡연(kosis)', '타이타닉(kaggle)', '파일 올리기'])
     if 데이터선택 == '파일 올리기':
         uploaded_file = st.file_uploader("데이터 학습에 사용할 파일을 올려주세요(csv)")
+        # 고친곳시작
+        dataframe = pd.read_csv('./data/' + '인구(kosis)' + '.csv', encoding='cp949', thousands=',')
+        # 고친곳끝
         if uploaded_file is not None:
             dataframe = pd.read_csv(uploaded_file, encoding="cp949", thousands=',')
     else:
-        dataframe = pd.read_csv('./data/'+데이터선택+'.csv', encoding='cp949', thousands=',')
+        dataframe = pd.read_csv('./data/' + 데이터선택 + '.csv', encoding='cp949', thousands=',')
 
     col1, col2, col3 = st.columns(3)
     행렬전환 = col1.checkbox("행렬 전환")
@@ -83,7 +87,6 @@ def dataVisualization():
     else:
         ax.set_ylabel(y데이터)
 
-
     ax.yaxis.set_major_locator(MaxNLocator(10))
     ax.xaxis.set_major_locator(MaxNLocator(10))
     if 차트종류 == 'line':
@@ -98,40 +101,41 @@ def dataVisualization():
     plt.savefig('./img/fig.png')
     with open('./img/fig.png', 'rb') as file:
         downBtn = st.download_button(
-            label = "차트 다운로드",
+            label="차트 다운로드",
             data=file,
-            file_name = "fig.png",
+            file_name="fig.png",
             mime='image/png'
         )
-
-
-
-
-
-
 
 
 def dataAi():
     st.header("🧪인공지능 실험실")
     st.subheader("데이터 선택")
-    데이터선택 = st.selectbox("데이터 선택", ['타이타닉 데이터(kaggle)','파일 올리기'],label_visibility='collapsed')
+    데이터선택 = st.selectbox("데이터 선택", ['타이타닉 데이터(kaggle)', '파일 올리기'], label_visibility='collapsed')
     if 데이터선택 == '파일 올리기':
         uploaded_file = st.file_uploader("데이터 학습에 사용할 파일을 올려주세요(csv)")
+        # 고친곳시작
+        df = pd.read_csv('./data/타이타닉(kaggle).csv')
+        # 고친곳끝
         if uploaded_file is not None:
             df = pd.read_csv(uploaded_file, encoding="cp949", thousands=',')
     elif 데이터선택 == '타이타닉 데이터(kaggle)':
         df = pd.read_csv('./data/타이타닉(kaggle).csv')
-
     st.write(df.head())
+
+    # 고친곳시작
     col1, col3, col2 = st.columns([3, 1, 1])
     col1.subheader("열 선택")
-    선택컬럼  = col1.multiselect("열 선택", df.columns, label_visibility='collapsed')
+    col1.write("최소 두 개의 데이터(예측 항목과 예측을 위해 학습시킬 데이터)를 선택하세요")
+    선택컬럼 = col1.multiselect("열 선택", df.columns, default=[df.columns[1], df.columns[2]], label_visibility='collapsed')
     data = df[선택컬럼]
     col3.subheader("데이터 처리")
-    데이터처리 = col3.selectbox("데이터 처리", ['없음','결측치제거'], label_visibility='collapsed')
+    col3.write("결측치 제거 유무를 선택하세요")
+    데이터처리 = col3.selectbox("데이터 처리", ['없음', '결측치제거'], label_visibility='collapsed')
     if 데이터처리 == '결측치제거':
         data = data.dropna()
     col2.subheader("예측항목")
+    col2.write("예측 항목을 선택하세요")
     target = col2.selectbox('Target Value', data.columns, label_visibility='collapsed')
     targetData = data.pop(target)
     col1.header("")
@@ -147,10 +151,10 @@ def dataAi():
     col3.write(count)
     col2.subheader('Target 데이터')
     col2.write(targetData.head())
-
+    # 고친곳끝
     st.header("")
     ds = tf.data.Dataset.from_tensor_slices((dict(data), targetData))
-    
+
     st.subheader('데이터 특성 설정(feature columns)')
 
     특성 = st.columns(len(data.columns))
@@ -159,7 +163,7 @@ def dataAi():
         fc = 특성[i].radio(value + "특성을 선택하세요", ["일반 숫자", "카테고리(one_hot)"], horizontal=True, key=value)
         if fc == "일반 숫자":
             feature_columns.append(tf.feature_column.numeric_column(value))
-        elif fc == "카테고리":
+        elif fc == "카테고리(one_hot)":
             vocab = data[value].unique()
             cat_c = tf.feature_column.categorical_column_with_vocabulary_list(value, vocab)
             one_hot = tf.feature_column.indicator_column(cat_c)
@@ -167,31 +171,29 @@ def dataAi():
     st.header("")
     st.subheader("신경망 모델 생성하기")
     신경망col = st.columns(3)
-    레이어개수 = 신경망col[0].number_input("신경망 레이어 개수 선택", step=1 ,value=3)
+    레이어개수 = 신경망col[0].number_input("신경망 레이어 개수 선택", step=1, value=3)
     손실함수 = 신경망col[1].selectbox("손실함수 선택", ['mean_squared_error', 'binary_crossentropy'])
     학습횟수 = 신경망col[2].number_input("학습 횟수 선택", step=1, value=10)
     컬럼 = st.columns(레이어개수)
     레이어 = []
     레이어.append(tf.keras.layers.DenseFeatures(feature_columns))
     for i in range(레이어개수):
-        if i == 레이어개수-1:
+        if i == 레이어개수 - 1:
             노드개수 = 컬럼[i].number_input("노드 개수 선택", step=1, value=1, key='노드개수' + str(i))
             활성함수 = 컬럼[i].radio("활성함수 선택", ['sigmoid', 'tanh', 'relu'], key='활성함수' + str(i), horizontal=True)
         else:
-            노드개수 = 컬럼[i].selectbox("노드 개수 선택", [128,64,32], key='노드개수'+str(i))
-            활성함수 = 컬럼[i].radio("활성함수 선택",['sigmoid', 'tanh', 'relu'], key='활성함수'+str(i), horizontal=True)
+            노드개수 = 컬럼[i].selectbox("노드 개수 선택", [128, 64, 32], key='노드개수' + str(i))
+            활성함수 = 컬럼[i].radio("활성함수 선택", ['sigmoid', 'tanh', 'relu'], key='활성함수' + str(i), horizontal=True)
         레이어.append(tf.keras.layers.Dense(노드개수, activation=활성함수))
 
     model = tf.keras.Sequential(레이어)
-
-
 
     model.compile(optimizer='adam', loss=손실함수, metrics=['acc'])
 
     ds_batch = ds.batch(32)
     btn = st.button('학습시작')
     if btn:
-        history = model.fit(ds_batch, shuffle = True, epochs=학습횟수)
+        history = model.fit(ds_batch, shuffle=True, epochs=학습횟수)
 
         plt.rc('font', family='NanumGothic')
         fig, ax = plt.subplots()
@@ -204,7 +206,6 @@ def dataAi():
 
         st.pyplot(fig)
         plt.savefig('./img/fig.png')
-        model.save('./model/titanic')
         with open('./img/fig.png', 'rb') as file:
             downBtn = st.download_button(
                 label="차트 다운로드",
@@ -212,11 +213,7 @@ def dataAi():
                 file_name="fig.png",
                 mime='image/png'
             )
-
-
-
 def setPageInfo():
-
     st.set_page_config(
         page_title="데이터운동장",
         page_icon="⚽",
@@ -228,10 +225,12 @@ def setPageInfo():
             'About': "# This is a header. This is an *extremely* cool app!"
         }
     )
+
+
 def playground():
     st.header('🎠인공지능 놀이터')
     # new_model = tf.keras.models.load_model('./model/my_model.h5')
-    menu = st.selectbox('가지고 올 모델을 선택하세요',['타이타닉 데이터'])
+    menu = st.selectbox('가지고 올 모델을 선택하세요', ['타이타닉 데이터'])
     if menu == '타이타닉 데이터':
         new_model = tf.keras.models.load_model('./model/titanic')
 
@@ -255,27 +254,54 @@ def playground():
         # 오류나는부분
         예측값 = new_model.predict(예측)
         생존확률 = 예측값[0][0].item()
-        생존확률 = round(생존확률, 2)*100
-        생존확률 = str(int(생존확률))+'%'
-        문장 = '당신의 생존확률은 :red['+생존확률+']입니다.'
+        생존확률 = round(생존확률, 2) * 100
+        생존확률 = str(int(생존확률)) + '%'
+        문장 = '당신의 생존확률은 :red[' + 생존확률 + ']입니다.'
         st.header(문장)
+
+    # 고친곳시작(추가)
+
+
+def tutorial():
+    st.title("데이터 운동장에 오신 여러분 환영합니다🎈🎉")
+    st.header(' 1. 데이터 운동장⚽')
+    st.subheader("데이터를 그래프로 시각화 해 보세요!")
+    st.subheader("데이터를 선, 막대, 히스토그램으로 나타낼 수 있어요")
+    st.write("데이터를 선, 막대, 히스토그램으로 나타낼 수 있어요")
+    st.write(" ")
+    st.write(" ")
+
+    st.header('2. 인공지능 실험실🧪')
+    st.subheader("데이터로 인공지능 예측 모델을 만들어 보세요!")
+    st.subheader("샘플 데이터를 선택하여 인공지능 예측 모델을 만들 수 있어요")
+    st.subheader("내가 ✨원하는 데이터를 업로드하여 인공지능 예측 모델을 만들 수 있어요")
+    st.write(" ")
+    st.write(" ")
+
+    st.header('3. 인공지능 놀이터🎠')
+    st.subheader("인공지능 모델로 예측해 보세요!")
+    st.subheader("데이터를 입력하여 결과를 예측할 수 있어요!")
+    st.write(" ")
+    st.write(" ")
+    # 고친곳끝
+
+
 def main():
     setPageInfo()
     fontRegistered()
-    st.sidebar.header("매천고등학교")
-    menu = st.sidebar.selectbox("MENU", ['데이터 운동장', '인공지능 실험실','인공지능 놀이터'])
+    st.sidebar.header("데이터와 함께 놀자! \n 데이터 운동장")
+    # 고친곳시작
+    menu = st.sidebar.selectbox("MENU", ['이용수칙', '데이터 운동장', '인공지능 실험실', '인공지능 놀이터'])
     st.sidebar.caption('이 페이지에는 네이버에서 제공한 나눔글꼴이 적용되어 있습니다.')
-    if menu == '데이터 운동장':
+    if menu == '이용수칙':
+        tutorial()
+    elif menu == '데이터 운동장':
         dataVisualization()
     elif menu == '인공지능 실험실':
         dataAi()
     elif menu == '인공지능 놀이터':
         playground()
-
-    
-    
-    
-    
+    # 고친곳끝
 
 
 if __name__ == "__main__":
