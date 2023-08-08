@@ -114,16 +114,43 @@ def dataAi():
     데이터선택 = st.selectbox("데이터 선택", ['타이타닉 데이터(kaggle)','당뇨병 데이터(kaggle)'], label_visibility='collapsed')
 
     if 데이터선택 == '타이타닉 데이터(kaggle)':
-        st.markdown('''
-            PassengerId : 승객번호 \t
-            Survived : 생존여부 (1 : 생존, 0 : 사망)
-            
-        ''')
+        clist = [
+            'PassengerID : 탑승객 고유 아이디',
+            'Survival : 생존 유무 (사망 : 0, 생존 : 1)',
+            'Pclass : 등실의 등급',
+            'Name : 이름',
+            'Sex : 성별',
+            'Age : 나이',
+            'Sibsp : 동승한 형제자매, 아내, 남편의 수',
+            'Parch : 동승한 부모, 자식의 수',
+            'Ticket :티켓 번호',
+            'Fare : 티켓의 요금',
+            'Cabin : 객실번호',
+            'Embarked : 배에 탑승한 항구 이름',
+        ]
+        c = st.columns(4)
+        for i, value in enumerate(clist):
+            c[i%4].write(value)
+
         df = pd.read_csv('./data/타이타닉(kaggle).csv')
     elif 데이터선택 == '당뇨병 데이터(kaggle)':
+        clist = [
+            'Pregnancies : 임신횟수',
+            'Glucose : 포도당 농도',
+            'BloodPressure : 혈압',
+            'SkinThickness : 피부두께',
+            'Insulin : 인슐린',
+            'BMI : 체질량지수',
+            'DiabetesPedigreeFunction : 당뇨병 혈통 기능',
+            'Age : 나이',
+            'Outcome : 당뇨병 여부(0: 발병되지 않음, 1: 발병)',
+        ]
+        c = st.columns(3)
+        for i, value in enumerate(clist):
+            c[i % 3].write(value)
         df = pd.read_csv('./data/당뇨병(kaggle).csv')
     st.write(df.head())
-
+    st.divider()
     # 고친곳시작
     col1, col3, col2 = st.columns([3, 1, 1])
     col1.subheader("열 선택")
@@ -139,9 +166,8 @@ def dataAi():
     col2.write("예측 항목을 선택하세요")
     target = col2.selectbox('Target Value', data.columns, label_visibility='collapsed')
     targetData = data.pop(target)
-    col1.header("")
-    col2.header("")
-    col3.header("")
+    st.write('')
+
     col1.subheader('데이터 확인(상위 5개 데이터)')
     col1.write(data.head())
     col3.subheader('데이터 정보')
@@ -157,7 +183,7 @@ def dataAi():
 
     ds = tf.data.Dataset.from_tensor_slices((dict(data), targetData))
 
-
+    st.divider()
     st.subheader('데이터 특성 설정(feature columns)')
 
     특성 = st.columns(len(data.columns))
@@ -194,6 +220,7 @@ def dataAi():
     model.compile(optimizer='adam', loss=손실함수, metrics=['acc'])
 
     ds_batch = ds.batch(3)
+    st.divider()
     btn = st.button('학습시작')
     if btn:
         history = model.fit(ds_batch, shuffle=True, epochs=학습횟수)
@@ -307,16 +334,21 @@ def playground():
 def tutorial():
     st.title("데이터 운동장에 오신 여러분 환영합니다🎈🎉")
     st.header(' 1. 데이터 운동장⚽')
-    st.subheader("데이터를 그래프로 시각화 해 보세요!")
-    st.subheader("데이터를 선, 막대, 히스토그램으로 나타낼 수 있어요")
-    st.write("데이터를 선, 막대, 히스토그램으로 나타낼 수 있어요")
-    st.write(" ")
-    st.write(" ")
+    st.subheader(" 1) 파일을 선택하거나 올릴수 있어요.")
+    st.write('CSV파일을 올릴 수 있어요.')
+    st.write('오류있는 데이터가 있는지 잘 확인해주세요.')
+    st.subheader(" 2) 데이터를 선택할 수 있어요.")
+    st.write("데이터의 행렬을 변경해야할 때는 행렬전환 체크박스를 선택해주세요.")
+    st.write("필요한 데이터의 열만 선택할 수 있습니다.")
+    st.subheader(" 3) 데이터를 시각화 할 수 있어요.")
+    st.write("line, bar, hist 그래프를 그릴 수 있어요.")
+    st.write("그래프를 그리기 위해 x, y 데이터를 선택해주세요.")
+    st.divider()
 
     st.header('2. 인공지능 실험실🧪')
-    st.subheader("데이터로 인공지능 예측 모델을 만들어 보세요!")
-    st.subheader("샘플 데이터를 선택하여 인공지능 예측 모델을 만들 수 있어요")
-    st.subheader("내가 ✨원하는 데이터를 업로드하여 인공지능 예측 모델을 만들 수 있어요")
+    st.subheader("1. 데이터를 선택할 수 있어요")
+    st.write("현재 제공되는 데이터는 타이타닉 데이터와 당뇨병 데이터 2개가 있어요")
+    st.subheader("2. 필요한 데이터를 선택할 수 있어요.")
     st.write(" ")
     st.write(" ")
 
