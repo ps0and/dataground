@@ -3,9 +3,11 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 import os
+import io
 import matplotlib.font_manager as fm
 from matplotlib.ticker import MaxNLocator
 import tensorflow as tf
+
 
 
 def unique(list):
@@ -28,11 +30,10 @@ def dataVisualization():
     st.subheader("1. 데이터 올리기")
     데이터선택 = st.selectbox("데이터 선택",
                          ['인구(kosis)', '기상관측(기상자료개방포털)', '장애인건강검진(kosis)', '청소년흡연(kosis)', '타이타닉(kaggle)', '파일 올리기'])
+    
     if 데이터선택 == '파일 올리기':
         uploaded_file = st.file_uploader("데이터 학습에 사용할 파일을 올려주세요(csv)")
-        # 고친곳시작
         dataframe = pd.read_csv('./data/' + '인구(kosis)' + '.csv', encoding='cp949', thousands=',')
-        # 고친곳끝
         if uploaded_file is not None:
             dataframe = pd.read_csv(uploaded_file, encoding="cp949", thousands=',')
     else:
@@ -42,31 +43,57 @@ def dataVisualization():
     행렬전환 = col1.checkbox("행렬 전환")
     if 행렬전환:
         dataframe = dataframe.transpose()
-        컬럼번호 = col2.number_input("컬럼명 지정", step=1)
+    컬럼번호 = col2.number_input("변경할 컬럼 번호", step=1, value=0)
+    컬럼변경버튼 = col3.button("컬럼명 변경")
+    if 컬럼변경버튼:
         dataframe.rename(columns=dataframe.iloc[컬럼번호], inplace=True)
-        삭제번호 = col3.number_input("삭제할 행 개수 선택", step=1)
-        for i in range(삭제번호):
-            dataframe = dataframe.drop(dataframe.index[0])
-
+        
+    st.subheader("2. 데이터 확인")
     st.write(dataframe.head())
+    buffer = io.StringIO()
+    dataframe.info(buf=buffer)
+    st.write("데이터프레임 정보 확인하기")
+    st.write(buffer.getvalue()[190:])
+    
     컬럼명 = dataframe.columns
-    st.subheader("2. 데이터 선택")
+    st.subheader("3. 자료형 변경")
+    자료형_c1, 자료형_c2 = st.columns(2)
+    
+    자료형_컬럼 = 자료형_c1.multiselect('변경할 컬럼을 선택하세요', 컬럼명)
+    변경할_자료형 = []
+    for value in 자료형_컬럼:
+        자료형_변경 = 자료형_c2.selectbox(value, ['int', 'str', 'float'], key=value)
+        변경할_자료형.append(자료형_변경)
+    자료형_변경_버튼 = 자료형_c1.button("자료형 변경")
+    if 자료형_변경_버튼:
+        for i, c in enumerate(자료형_컬럼):
+            dataframe[c] = dataframe[c].astype(변경할_자료형[i])
+    buffer = io.StringIO()
+    dataframe.info(buf=buffer)
+    st.write("데이터프레임 정보 확인하기")
+    st.write(buffer.getvalue()[190:])
+
+    st.subheader("3. 데이터 선택(열)")
     컬럼선택 = st.multiselect('컬럼명을 선택하세요', 컬럼명)
     data = dataframe[컬럼선택]
     st.write("상위 5개 데이터를 보여줍니다.")
     st.write(data.head())
+
     st.subheader("3. 데이터 시각화")
     차트종류 = st.radio("차트 종류를 선택하세요", ['line', 'bar', 'hist'])
 
-    col1, col2 = st.columns(2)
+    col1, col2, col3 = st.columns(3)
     컬럼선택.append('index')
     x데이터 = col1.selectbox("x축 데이터", 컬럼선택)
     if 차트종류 == 'line':
         y데이터 = col2.multiselect("y축 데이터", 컬럼선택)
+        y2데이터 = col3.multiselect("y2축 데이터", 컬럼선택)
     else:
         y데이터 = col2.selectbox("y축 데이터", 컬럼선택)
+        
 
     plt.rc('font', family='NanumGothic')
+    plt.rc('axes', unicode_minus=False )
 
     fig, ax = plt.subplots()
 
@@ -74,10 +101,25 @@ def dataVisualization():
         x = data.index
     else:
         x = data[x데이터]
-    if y데이터 == 'index':
-        y = data.index
-    else:
+    if 차트종류 == 'line':
+        for col in y데이터:
+            ax.plot(x, data[col], label=col)  # y데이터의 각 컬럼에 대해 라인을 그리며 레이블 추가
+        if y2데이터:
+            ax2 = ax.twinx()
+            for col in y2데이터:
+                ax2.plot(x, data[col], label=col)
+            ax2.legend(loc="upper right")
+        ax.legend(loc="upper left")  # 범례 추가
+
+
+    elif 차트종류 == 'bar':
         y = data[y데이터]
+        ax.bar(x, y, label=y데이터)
+        ax.legend()
+    else:
+        ax.hist(x, label=x데이터)
+        ax.legend()
+
     if x데이터 == 'index':
         ax.set_xlabel('index')
     else:
@@ -86,18 +128,23 @@ def dataVisualization():
         ax.set_ylabel('index')
     else:
         ax.set_ylabel(y데이터)
-
-    ax.yaxis.set_major_locator(MaxNLocator(10))
-    ax.xaxis.set_major_locator(MaxNLocator(10))
-    if 차트종류 == 'line':
-        ax.plot(x, y)
-        st.pyplot(fig)
-    elif 차트종류 == 'bar':
-        ax.bar(x, y)
-        st.pyplot(fig)
+    if y2데이터 == 'index':
+        ax2.set_ylabel('index')
     else:
-        ax.hist(x)
+        ax2.set_ylabel(y데이터)
+    
+
+    st.write('축 데이터 개수 설정')
+    c1, c2 = st.columns(2)
+    x축개수 = c1.number_input("x축 최대 개수", value=10, step=1)
+    y축개수 = c2.number_input("y축 최대 개수", value=10, step=1)
+    ax.yaxis.set_major_locator(MaxNLocator(y축개수))
+    ax.xaxis.set_major_locator(MaxNLocator(x축개수))
+    
+    차트그리기_버튼 = st.button('차트 그리기')
+    if 차트그리기_버튼:
         st.pyplot(fig)
+
     plt.savefig('./img/fig.png')
     with open('./img/fig.png', 'rb') as file:
         downBtn = st.download_button(
@@ -106,7 +153,6 @@ def dataVisualization():
             file_name="fig.png",
             mime='image/png'
         )
-
 
 def dataAi():
     st.header("🧪인공지능 실험실")
@@ -151,6 +197,8 @@ def dataAi():
         df = pd.read_csv('./data/당뇨병(kaggle).csv')
     st.write(df.head())
     st.divider()
+
+
     # 고친곳시작
     col1, col3, col2 = st.columns([3, 1, 1])
     col1.subheader("열 선택")
@@ -186,40 +234,55 @@ def dataAi():
     st.divider()
     st.subheader('데이터 특성 설정(feature columns)')
 
+    st.subheader('데이터 특성 설정')
+
+    st.subheader('데이터 특성 설정')
+
     특성 = st.columns(len(data.columns))
-    feature_columns = []
+    inputs = []
+    encoded_inputs = []
+
     for i, value in enumerate(data.columns):
         fc = 특성[i].radio(value + "특성을 선택하세요", ["일반 숫자", "카테고리(one_hot)"], horizontal=True, key=value)
+        
         if fc == "일반 숫자":
-            feature_columns.append(tf.feature_column.numeric_column(value))
+            input_layer = tf.keras.layers.Input(shape=(1,), name=value)
+            inputs.append(input_layer)
+            encoded_inputs.append(input_layer)
+        
         elif fc == "카테고리(one_hot)":
-            vocab = data[value].unique()
-            cat_c = tf.feature_column.categorical_column_with_vocabulary_list(value, vocab)
-            one_hot = tf.feature_column.indicator_column(cat_c)
-            feature_columns.append(one_hot)
-    st.header("")
+            # 문자열 범주형 데이터를 정수로 변환 후 One-hot 인코딩
+            input_layer = tf.keras.layers.Input(shape=(1,), dtype=tf.string, name=value)
+            lookup = tf.keras.layers.StringLookup(output_mode='int')(input_layer)
+            one_hot_encoded = tf.keras.layers.CategoryEncoding(num_tokens=lookup.vocabulary_size(), output_mode="one_hot")(lookup)
+            
+            inputs.append(input_layer)
+            encoded_inputs.append(one_hot_encoded)
+
+    # Concatenate all encoded inputs
+    if len(encoded_inputs) > 1:
+        concatenated_inputs = tf.keras.layers.Concatenate()(encoded_inputs)
+    else:
+        concatenated_inputs = encoded_inputs[0]
+
+    # 신경망 모델 생성
     st.subheader("신경망 모델 생성하기")
     신경망col = st.columns(3)
     레이어개수 = 신경망col[0].number_input("신경망 레이어 개수 선택", step=1, value=3)
     손실함수 = 신경망col[1].selectbox("손실함수 선택", ['mean_squared_error', 'binary_crossentropy','categorical_crossentropy','sparse_categorical_crossentropy'])
     학습횟수 = 신경망col[2].number_input("학습 횟수 선택", step=1, value=10)
-    컬럼 = st.columns(레이어개수)
-    레이어 = []
-    레이어.append(tf.keras.layers.DenseFeatures(feature_columns))
-    for i in range(레이어개수):
-        if i == 레이어개수 - 1:
-            노드개수 = 컬럼[i].number_input("노드 개수 선택", step=1, value=1, key='노드개수' + str(i))
-            활성함수 = 컬럼[i].radio("활성화함수 선택", ['sigmoid', 'tanh', 'relu','softmax'], key='활성함수' + str(i), horizontal=True)
-        else:
-            노드개수 = 컬럼[i].selectbox("노드 개수 선택", [128, 64, 32], key='노드개수' + str(i))
-            활성함수 = 컬럼[i].radio("활성화함수 선택", ['sigmoid', 'tanh', 'relu','softmax'], key='활성함수' + str(i), horizontal=True)
-        레이어.append(tf.keras.layers.Dense(노드개수, activation=활성함수))
 
-    model = tf.keras.Sequential(레이어)
+    x = concatenated_inputs
+    for i in range(레이어개수):
+        노드개수 = 128 if i < 레이어개수 - 1 else 1
+        활성함수 = 'relu' if i < 레이어개수 - 1 else 'sigmoid'
+        x = tf.keras.layers.Dense(노드개수, activation=활성함수)(x)
+
+    model = tf.keras.Model(inputs=inputs, outputs=x)
 
     model.compile(optimizer='adam', loss=손실함수, metrics=['acc'])
 
-    ds_batch = ds.batch(3)
+    ds_batch = ds.batch(32)
     st.divider()
     btn = st.button('학습시작')
     if btn:
@@ -236,7 +299,6 @@ def dataAi():
 
         st.pyplot(fig)
         plt.savefig('./img/fig.png')
-        # model.save('./model/diabetes')
         with open('./img/fig.png', 'rb') as file:
             downBtn = st.download_button(
                 label="차트 다운로드",
@@ -244,6 +306,8 @@ def dataAi():
                 file_name="fig.png",
                 mime='image/png'
             )
+
+
 def setPageInfo():
     st.set_page_config(
         page_title="데이터운동장",
@@ -362,6 +426,9 @@ def main():
     # 고친곳시작
     menu = st.sidebar.selectbox("MENU", ['이용수칙', '데이터 운동장', '인공지능 실험실', '인공지능 놀이터'])
     st.sidebar.caption('이 페이지에는 네이버에서 제공한 나눔글꼴이 적용되어 있습니다.')
+
+    menu = '데이터 운동장'
+
     if menu == '이용수칙':
         tutorial()
     elif menu == '데이터 운동장':
