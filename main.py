@@ -16,7 +16,8 @@ def unique(list):
 
 
 @st.cache_data
-def fontRegistered():    font_dirs = [os.getcwd() + '/customFonts']
+def fontRegistered():    
+    font_dirs = [os.getcwd() + '/customFonts']
     font_files = fm.findSystemFonts(fontpaths=font_dirs)
 
     for font_file in font_files:
