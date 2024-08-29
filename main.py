@@ -81,21 +81,24 @@ def dataVisualization():
 
     st.subheader("5. 데이터선택(행)")
     st.write()
+    
+
     행c1, 행c2 = st.columns(2)
-    행항목 = 행c1.multiselect('조건을 적용할 열 이름을 선택하세요', 컬럼명)
+    행항목 = 행c1.multiselect('조건을 적용할 열 이름을 선택하세요', 컬럼선택)
     행항목리스트 = []
     for value in 행항목:
         행항목리스트.append(행c2.text_input(value+"에 적용할 조건을 입력하세요"))
 
-    행필터 = st.button("적용하기")
+    
+    for i, value in enumerate(행항목리스트):
+        행str = 행항목[i]+value        
+        data = data.query(행str)
+        
+
+    행필터 = st.button("확인하기")    
     if 행필터:
-        for value in 행항목리스트:
-            행str = 'dataframe[dataframe["시점"]'+value+']'
-            st.write(행str)
-            dataframe = exec(행str)
-            st.write(value)
         st.subheader("전처리 완료!!!")
-        st.write(dataframe)
+        st.write(data)
 
     st.subheader("6. 데이터 시각화")
     차트종류 = st.radio("차트 종류를 선택하세요", ['line', 'bar', 'hist'])
@@ -114,7 +117,7 @@ def dataVisualization():
         y2데이터 = col3.multiselect("y2축 데이터", 컬럼선택)
     elif 차트종류 == 'bar':
         y데이터 = col2.selectbox("y축 데이터", 컬럼선택)   
-        
+
     plt.rc('font', family='NanumGothic')
     plt.rc('axes', unicode_minus=False )
 
@@ -453,7 +456,7 @@ def main():
     menu = st.sidebar.selectbox("MENU", ['이용수칙', '데이터 운동장', '인공지능 실험실', '인공지능 놀이터'])
     st.sidebar.caption('이 페이지에는 네이버에서 제공한 나눔글꼴이 적용되어 있습니다.')
 
-    
+    menu = '데이터 운동장'
 
     if menu == '이용수칙':
         tutorial()
