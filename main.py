@@ -16,8 +16,7 @@ def unique(list):
 
 
 @st.cache_data
-def fontRegistered():
-    font_dirs = [os.getcwd() + '/customFonts']
+def fontRegistered():    font_dirs = [os.getcwd() + '/customFonts']
     font_files = fm.findSystemFonts(fontpaths=font_dirs)
 
     for font_file in font_files:
@@ -456,7 +455,7 @@ def main():
     menu = st.sidebar.selectbox("MENU", ['이용수칙', '데이터 운동장', '인공지능 실험실', '인공지능 놀이터'])
     st.sidebar.caption('이 페이지에는 네이버에서 제공한 나눔글꼴이 적용되어 있습니다.')
 
-    menu = '데이터 운동장'
+    
 
     if menu == '이용수칙':
         tutorial()
