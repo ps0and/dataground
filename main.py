@@ -73,25 +73,48 @@ def dataVisualization():
     st.write("데이터프레임 정보 확인하기")
     st.write(buffer.getvalue()[190:])
 
-    st.subheader("3. 데이터 선택(열)")
+    st.subheader("4. 데이터 선택(열)")
     컬럼선택 = st.multiselect('컬럼명을 선택하세요', 컬럼명)
     data = dataframe[컬럼선택]
     st.write("상위 5개 데이터를 보여줍니다.")
     st.write(data.head())
 
-    st.subheader("3. 데이터 시각화")
+    st.subheader("5. 데이터선택(행)")
+    st.write()
+    행c1, 행c2 = st.columns(2)
+    행항목 = 행c1.multiselect('조건을 적용할 열 이름을 선택하세요', 컬럼명)
+    행항목리스트 = []
+    for value in 행항목:
+        행항목리스트.append(행c2.text_input(value+"에 적용할 조건을 입력하세요"))
+
+    행필터 = st.button("적용하기")
+    if 행필터:
+        for value in 행항목리스트:
+            행str = 'dataframe[dataframe["시점"]'+value+']'
+            st.write(행str)
+            dataframe = exec(행str)
+            st.write(value)
+        st.subheader("전처리 완료!!!")
+        st.write(dataframe)
+
+    st.subheader("6. 데이터 시각화")
     차트종류 = st.radio("차트 종류를 선택하세요", ['line', 'bar', 'hist'])
 
     col1, col2, col3 = st.columns(3)
     컬럼선택.append('index')
+
+    x데이터=''
+    y데이터=''
+    y2데이터=''
+
     x데이터 = col1.selectbox("x축 데이터", 컬럼선택)
+
     if 차트종류 == 'line':
         y데이터 = col2.multiselect("y축 데이터", 컬럼선택)
         y2데이터 = col3.multiselect("y2축 데이터", 컬럼선택)
-    else:
-        y데이터 = col2.selectbox("y축 데이터", 컬럼선택)
+    elif 차트종류 == 'bar':
+        y데이터 = col2.selectbox("y축 데이터", 컬럼선택)   
         
-
     plt.rc('font', family='NanumGothic')
     plt.rc('axes', unicode_minus=False )
 
@@ -128,18 +151,21 @@ def dataVisualization():
         ax.set_ylabel('index')
     else:
         ax.set_ylabel(y데이터)
-    if y2데이터 == 'index':
-        ax2.set_ylabel('index')
-    else:
-        ax2.set_ylabel(y데이터)
+    if y2데이터:
+        if y2데이터 == 'index':            
+            ax2.set_ylabel('index')
+        else:            
+            ax2.set_ylabel(y데이터)
     
 
     st.write('축 데이터 개수 설정')
-    c1, c2 = st.columns(2)
-    x축개수 = c1.number_input("x축 최대 개수", value=10, step=1)
-    y축개수 = c2.number_input("y축 최대 개수", value=10, step=1)
-    ax.yaxis.set_major_locator(MaxNLocator(y축개수))
-    ax.xaxis.set_major_locator(MaxNLocator(x축개수))
+    축_개수_설정 = st.checkbox('축 개수 설정하기')
+    if 축_개수_설정:
+        c1, c2 = st.columns(2)
+        x축개수 = c1.number_input("x축 최대 개수", value=10, step=1)
+        y축개수 = c2.number_input("y축 최대 개수", value=10, step=1)
+        ax.yaxis.set_major_locator(MaxNLocator(y축개수))
+        ax.xaxis.set_major_locator(MaxNLocator(x축개수))
     
     차트그리기_버튼 = st.button('차트 그리기')
     if 차트그리기_버튼:
@@ -427,7 +453,7 @@ def main():
     menu = st.sidebar.selectbox("MENU", ['이용수칙', '데이터 운동장', '인공지능 실험실', '인공지능 놀이터'])
     st.sidebar.caption('이 페이지에는 네이버에서 제공한 나눔글꼴이 적용되어 있습니다.')
 
-    
+    menu = '데이터 운동장'
 
     if menu == '이용수칙':
         tutorial()
