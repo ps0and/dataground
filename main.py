@@ -7,23 +7,21 @@ import io
 import matplotlib.font_manager as fm
 from matplotlib.ticker import MaxNLocator
 import tensorflow as tf
-
-
+import joblib
+from sklearn.preprocessing import StandardScaler, LabelEncoder
 
 def unique(list):
     x = np.array(list)
     return np.unique(x)
 
-
 @st.cache_data
-def fontRegistered():    
+def fontRegistered():
     font_dirs = [os.getcwd() + '/customFonts']
     font_files = fm.findSystemFonts(fontpaths=font_dirs)
 
     for font_file in font_files:
         fm.fontManager.addfont(font_file)
     fm._load_fontmanager(try_read_cache=False)
-
 
 def dataVisualization():
     st.header('⚽데이터 운동장')
@@ -194,7 +192,7 @@ def dataAi():
             'Survival : 생존 유무 (사망 : 0, 생존 : 1)',
             'Pclass : 등실의 등급',
             'Name : 이름',
-            'Sex : 성별',
+            'Gender : 성별',
             'Age : 나이',
             'Sibsp : 동승한 형제자매, 아내, 남편의 수',
             'Parch : 동승한 부모, 자식의 수',
@@ -227,116 +225,131 @@ def dataAi():
     st.write(df.head())
     st.divider()
 
-
-    # 고친곳시작
-    col1, col3, col2 = st.columns([3, 1, 1])
+    col1, col2 = st.columns([3, 1])
     col1.subheader("열 선택")
     col1.write("최소 두 개의 데이터(예측 항목과 예측을 위해 학습시킬 데이터)를 선택하세요")
     선택컬럼 = col1.multiselect("열 선택", df.columns, default=[df.columns[1], df.columns[2]], label_visibility='collapsed')
     data = df[선택컬럼]
-    col3.subheader("데이터 처리")
-    col3.write("결측치 제거 유무를 선택하세요")
-    데이터처리 = col3.selectbox("데이터 처리", ['없음', '결측치제거'], label_visibility='collapsed')
-    if 데이터처리 == '결측치제거':
-        data = data.dropna()
+
+    
+
     col2.subheader("예측항목")
     col2.write("예측 항목을 선택하세요")
     target = col2.selectbox('Target Value', data.columns, label_visibility='collapsed')
-    targetData = data.pop(target)
-    st.write('')
-
+    
+    
     col1.subheader('데이터 확인(상위 5개 데이터)')
     col1.write(data.head())
-    col3.subheader('데이터 정보')
+    
+    col2.subheader('Target 데이터')
+    col2.write(data[target].head())
+    
+
+    col1.subheader("데이터 처리")
+    col1.write("결측치 제거 유무를 선택하세요")
+
+    데이터처리 = col1.selectbox("데이터 처리", ['제거하지 않음', '결측치제거','결측치 채우기'], label_visibility='collapsed')
+    if 데이터처리 == '결측치제거':
+        data = data.dropna()
+    elif 데이터처리 == '결측치 채우기':
+        결측_컬럼 = col1.multiselect('컬럼 선택', data.columns)        
+        for value in 결측_컬럼:
+            처리방법 = col1.selectbox(value+"결측치 처리", ['평균값', '중앙값', '최대값', '최소값', '0'])
+            if 처리방법 == '평균값':
+                data[value].fillna(data[value].mean(), inplace=True)
+            elif 처리방법 == '중앙값':
+                data[value].fillna(data[value].median(), inplace=True)
+            elif 처리방법 == '최대값':
+                data[value].fillna(data[value].max(), inplace=True)
+            elif 처리방법 == '최소값':
+                data[value].fillna(data[value].min(), inplace=True)
+            elif 처리방법 == '0':
+                data[value].fillna(0, inplace=True)
+        
+        
+        # data['Age'].fillna(data['Age'].mean(), inplace=True)
+        
+
     count = pd.DataFrame(data.count())
     count.columns = ['개수']
     결측치 = pd.DataFrame(data.isnull().sum())
     count['결측치'] = 결측치
-    col3.write(count)
-    col2.subheader('Target 데이터')
-    col2.write(targetData.head())
-    # 고친곳끝
+    col2.subheader('결측치 확인')
+    col2.write(count)
+
+    #x, y 데이터 분리
+    X = data.drop(target, axis=1)
+    Y = data[target]
+
+    st.write('')
+
+    
+    
     st.header("")
-
-    ds = tf.data.Dataset.from_tensor_slices((dict(data), targetData))
-
     st.divider()
     st.subheader('데이터 특성 설정(feature columns)')
 
-    st.subheader('데이터 특성 설정')
+    try:
+        특성 = st.columns(len(data.columns))
 
-    st.subheader('데이터 특성 설정')
+        for i, value in enumerate(data.columns):
+            fc = 특성[i].radio(value + "특성을 선택하세요", ["일반 숫자", "범주형 데이터"], horizontal=True, key=value)
+            if fc == "범주형 데이터":
+                X[value] = LabelEncoder().fit_transform(X[value])
+                
+        scaler = StandardScaler()
+        X_train = scaler.fit_transform(X)
 
-    특성 = st.columns(len(data.columns))
-    inputs = []
-    encoded_inputs = []
 
-    for i, value in enumerate(data.columns):
-        fc = 특성[i].radio(value + "특성을 선택하세요", ["일반 숫자", "카테고리(one_hot)"], horizontal=True, key=value)
-        
-        if fc == "일반 숫자":
-            input_layer = tf.keras.layers.Input(shape=(1,), name=value)
-            inputs.append(input_layer)
-            encoded_inputs.append(input_layer)
-        
-        elif fc == "카테고리(one_hot)":
-            # 문자열 범주형 데이터를 정수로 변환 후 One-hot 인코딩
-            input_layer = tf.keras.layers.Input(shape=(1,), dtype=tf.string, name=value)
-            lookup = tf.keras.layers.StringLookup(output_mode='int')(input_layer)
-            one_hot_encoded = tf.keras.layers.CategoryEncoding(num_tokens=lookup.vocabulary_size(), output_mode="one_hot")(lookup)
+        # 신경망 모델 생성
+        st.subheader("신경망 모델 생성하기")
+        신경망col = st.columns(3)
+        레이어개수 = 신경망col[0].number_input("신경망 레이어 개수 선택", step=1, value=3)
+        손실함수 = 신경망col[1].selectbox("손실함수 선택", ['mean_squared_error', 'binary_crossentropy','categorical_crossentropy','sparse_categorical_crossentropy'])
+        학습횟수 = 신경망col[2].number_input("학습 횟수 선택", step=1, value=10)
+
+
+        레이어 = [tf.keras.layers.InputLayer(input_shape=(X_train.shape[1],))]
+
+        for i in range(레이어개수):        
+            노드개수 = 신경망col[0].number_input(str(i)+"번 레이어의 노드 개수", value=128, step=1)
+            활성함수 = 신경망col[1].selectbox(str(i)+"번 레이어의 활성화함수", ['relu', 'sigmoid'])
+            레이어.append(tf.keras.layers.Dense(노드개수, activation=활성함수))
             
-            inputs.append(input_layer)
-            encoded_inputs.append(one_hot_encoded)
 
-    # Concatenate all encoded inputs
-    if len(encoded_inputs) > 1:
-        concatenated_inputs = tf.keras.layers.Concatenate()(encoded_inputs)
-    else:
-        concatenated_inputs = encoded_inputs[0]
+        btn = st.button("학습시작")
+        st.write()
+        if btn:
+            try:
+                model = tf.keras.Sequential(레이어)
 
-    # 신경망 모델 생성
-    st.subheader("신경망 모델 생성하기")
-    신경망col = st.columns(3)
-    레이어개수 = 신경망col[0].number_input("신경망 레이어 개수 선택", step=1, value=3)
-    손실함수 = 신경망col[1].selectbox("손실함수 선택", ['mean_squared_error', 'binary_crossentropy','categorical_crossentropy','sparse_categorical_crossentropy'])
-    학습횟수 = 신경망col[2].number_input("학습 횟수 선택", step=1, value=10)
+                model.compile(optimizer='adam', loss=손실함수, metrics=['acc'])
+                history = model.fit(X_train, Y, shuffle=True, epochs=학습횟수, batch_size=32, validation_split=0.2)
 
-    x = concatenated_inputs
-    for i in range(레이어개수):
-        노드개수 = 128 if i < 레이어개수 - 1 else 1
-        활성함수 = 'relu' if i < 레이어개수 - 1 else 'sigmoid'
-        x = tf.keras.layers.Dense(노드개수, activation=활성함수)(x)
+                plt.rc('font', family='NanumGothic')
+                fig, ax = plt.subplots()
+                ax.set_title('학습 정확도')
+                ax.set_ylabel('정확도')
+                ax.set_xlabel('학습 횟수')
+                ax.yaxis.set_major_locator(MaxNLocator(10))
+                ax.xaxis.set_major_locator(MaxNLocator(10))
+                ax.plot(history.history["acc"])
 
-    model = tf.keras.Model(inputs=inputs, outputs=x)
-
-    model.compile(optimizer='adam', loss=손실함수, metrics=['acc'])
-
-    ds_batch = ds.batch(32)
-    st.divider()
-    btn = st.button('학습시작')
-    if btn:
-        history = model.fit(ds_batch, shuffle=True, epochs=학습횟수)
-
-        plt.rc('font', family='NanumGothic')
-        fig, ax = plt.subplots()
-        ax.set_title('학습 정확도')
-        ax.set_ylabel('정확도')
-        ax.set_xlabel('학습 횟수')
-        ax.yaxis.set_major_locator(MaxNLocator(10))
-        ax.xaxis.set_major_locator(MaxNLocator(10))
-        ax.plot(history.history["acc"])
-
-        st.pyplot(fig)
-        plt.savefig('./img/fig.png')
-        with open('./img/fig.png', 'rb') as file:
-            downBtn = st.download_button(
-                label="차트 다운로드",
-                data=file,
-                file_name="fig.png",
-                mime='image/png'
-            )
-
-
+                st.pyplot(fig)
+                plt.savefig('./img/fig.png')
+                with open('./img/fig.png', 'rb') as file:
+                    downBtn = st.download_button(
+                        label="차트 다운로드",
+                        data=file,
+                        file_name="fig.png",
+                        mime='image/png'
+                    )
+            except Exception as e:
+                st.error(f'예상치 못한 오류가 발생했습니다. {e}')
+    except ValueError as ve:
+        st.error(f'범주형 데이터가 포함되어있습니다. 확인해보세요. {ve}')
+    except Exception as e:
+        st.error(f'예상치 못한 오류가 발생했습니다: {e}')
 def setPageInfo():
     st.set_page_config(
         page_title="데이터운동장",
@@ -350,69 +363,77 @@ def setPageInfo():
         }
     )
 
-
 def playground():
-    st.header('🎠인공지능 놀이터')
-    # new_model = tf.keras.models.load_model('./model/my_model.h5')
+    st.header('🎠 인공지능 놀이터')
+    
     st.subheader("모델을 선택하세요")
     menu = st.selectbox('모델을 선택하세요', ['타이타닉 데이터', '당뇨병 데이터'], label_visibility='collapsed')
+    
     if menu == '타이타닉 데이터':
-        new_model = tf.keras.models.load_model('./model/titanic')
+        # 저장된 모델 불러오기
+        new_model = tf.keras.models.load_model('./model/titanic_model.h5')
+
+        # 저장된 Scaler 불러오기
+        scaler = joblib.load('./model/titanic_scaler.pkl')
 
         col1, col2, col3 = st.columns(3)
-        # if 데이터선택 == "타이타닉 데이터":
         나이 = col1.number_input('나이를 입력하세요.', value=30, step=1)
-        # 나이 = np.float32(나이)
         객실등급 = col2.number_input('객실 등급을 입력하세요', value=2, step=1)
-        # 객실등급 = np.float32(객실등급)
         성별 = col3.selectbox('성별을 선택하세요', ['male', 'female'])
 
-        # 예측하기 = st.button("생존 확률은?")
-        # if 예측하기:
-        예측 = pd.DataFrame({
-            'Age': [나이],
-            'Pclass': [객실등급],
-            'Gender': [성별]
-        })
-        예측 = tf.data.Dataset.from_tensor_slices(dict(예측))
-        예측 = 예측.batch(32)
-        # 오류나는부분
-        예측값 = new_model.predict(예측)
-        생존확률 = 예측값[0][0].item()
-        생존확률 = round(생존확률, 2) * 100
-        생존확률 = str(int(생존확률)) + '%'
-        문장 = '당신의 생존확률은 :red[' + 생존확률 + ']입니다.'
-        st.header(문장)
-    elif menu == '당뇨병 데이터':
-        new_model = tf.keras.models.load_model('./model/diabetes')
-        col1, col2, col3, col4,col5 = st.columns(5)
-        # if 데이터선택 == "타이타닉 데이터":
+        성별 = 1 if 성별 == 'male' else 0  # 성별을 숫자로 변환 (male: 1, female: 0)
 
+        # 예측을 위한 입력 데이터 구성
+        예측 = pd.DataFrame({
+            'Pclass': [객실등급],
+            'Gender': [성별],
+            'Age': [나이]
+        })
+
+        # 입력 데이터를 모델이 기대하는 형태로 변환
+        예측 = scaler.transform(예측)
+        예측_np = np.array(예측, dtype=np.float32)
+        
+        # 모델 예측
+        예측값 = new_model.predict(예측_np)
+        
+        생존확률 = 예측값[0][0] * 100  # 확률을 퍼센트로 변환
+        생존확률 = round(생존확률, 2)  # 소수점 2자리까지 반올림
+        문장 = f'당신의 생존확률은 :red[{생존확률}%]입니다.'
+        st.header(문장)
+    
+    elif menu == '당뇨병 데이터':
+        new_model = tf.keras.models.load_model('./model/diabetes_model.h5')
+        scaler = joblib.load('./model/diabetes_scaler.pkl')
+        
+        col1, col2, col3, col4, col5 = st.columns(5)
         임신횟수 = col1.number_input('임신횟수를 입력하세요.', value=0, step=1)
         나이 = col2.number_input('나이를 입력하세요', value=20, step=1)
         키 = col3.number_input('키를 입력하세요', value=170, step=1)
         몸무게 = col4.number_input('몸무게를 입력하세요', value=60, step=1)
         혈압 = col5.number_input('혈압을 입력하세요', value=80, step=1)
 
-        bmi = 몸무게/키**2
+        bmi = 몸무게 / (키 / 100) ** 2  # BMI 계산 (키를 미터 단위로 변환)
 
         예측 = pd.DataFrame({
-            'BloodPressure': [혈압],
-            'BMI': [bmi],
+            'Pregnancies': [임신횟수],
             'Age': [나이],
-            'Pregnancies' : [임신횟수]
+            'BMI': [bmi],
+            'BloodPressure': [혈압]
         })
-        예측 = tf.data.Dataset.from_tensor_slices(dict(예측))
-        예측 = 예측.batch(32)
-        # 오류나는부분
-        예측값 = new_model.predict(예측)
-        확률 = 예측값[0][0].item()
-        확률 = round(확률, 2) * 100
-        확률 = str(int(확률)) + '%'
-        문장 = '당뇨병일 확률은 :red[' + 확률 + ']입니다.'
+
+        # 모델 예측을 위해 numpy array로 변환
+        예측 = scaler.transform(예측)
+        예측_np = np.array(예측, dtype=np.float32)
+        
+        # 모델 예측
+        예측값 = new_model.predict(예측_np)
+        확률 = 예측값[0][0] * 100  # 확률을 퍼센트로 변환
+        확률 = round(확률, 2)  # 소수점 2자리까지 반올림
+        문장 = f'당뇨병일 확률은 :red[{확률}%]입니다.'
         st.header(문장)
 
-    # 고친곳시작(추가)
+    
 
 
 def tutorial():
@@ -455,8 +476,8 @@ def main():
     # 고친곳시작
     menu = st.sidebar.selectbox("MENU", ['이용수칙', '데이터 운동장', '인공지능 실험실', '인공지능 놀이터'])
     st.sidebar.caption('이 페이지에는 네이버에서 제공한 나눔글꼴이 적용되어 있습니다.')
-
     
+    menu = '인공지능 실험실'
 
     if menu == '이용수칙':
         tutorial()
