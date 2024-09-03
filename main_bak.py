@@ -2,6 +2,10 @@ import streamlit as st
 import numpy as np
 import os
 import matplotlib.font_manager as fm
+from playground import playground
+from tutorial1 import tutorial
+from dataVisualization import dataVisualization
+from dataAi import dataAi
 
 def unique(list):
     x = np.array(list)
@@ -30,35 +34,32 @@ def setPageInfo():
         }
     )
 
+    # 고친곳끝
+
 
 def main():
     setPageInfo()
     fontRegistered()
+    st.sidebar.header("데이터와 함께 놀자! \n 데이터 운동장")
+    # 고친곳시작
+    menu = st.sidebar.selectbox("MENU", ['이용수칙', '데이터 운동장', '인공지능 실험실', '인공지능 놀이터'])
+    st.sidebar.caption('이 페이지에는 네이버에서 제공한 나눔글꼴이 적용되어 있습니다.')
+    
+    
 
-    pages = {
-        "알아보기":[
-            st.Page("tutorial1.py", title="시작하기"),
-            st.Page("tutorial2.py", title="데이터 분석이란?"),
-            st.Page("tutorial3.py", title="데이터 전처리란?")
-        ],
-        "데이터 학습하기": [            
-            st.Page("data01.py", title="1. 데이터 불러오기"),
-            st.Page("data02.py", title="2. 데이터프레임 확인하기"),
-            st.Page("data03.py", title="3. 열 필터링"),
-            st.Page("preprocessing.py", title="데이터전처리 학습하기"),
-            st.Page("dataVisualization.py", title="데이터 운동장"),
-        ],
-        "인공지능 학습하기": [
-            st.Page("dataAi.py", title="인공지능 실험실"),
-            st.Page("playground.py", title="인공지능 놀이터"),
-        ],
-    }
-
-    pg = st.navigation(pages)
-    pg.run()
-
+    if menu == '이용수칙':
+        tutorial()
+    elif menu == '데이터 운동장':
+        dataVisualization()
+    elif menu == '인공지능 실험실':
+        dataAi()
+    elif menu == '인공지능 놀이터':
+        playground()
+    # 고친곳끝
 
 
 if __name__ == "__main__":
     main()
+
+
 
