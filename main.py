@@ -46,8 +46,10 @@ def main():
             st.Page("data02.py", title="2. 데이터프레임 확인하기"),
             st.Page("data03.py", title="3. 열 필터링"),
             st.Page("data04.py", title="4. 행 필터링"),
-            st.Page("preprocessing.py", title="데이터전처리 학습하기"),
-            st.Page("dataVisualization.py", title="데이터 운동장"),
+            st.Page("data05.py", title="5. 결측치 처리")
+        ],
+        "데이터 실습하기" :[
+            st.Page("dataVisualization.py", title="데이터 운동장")
         ],
         "인공지능 학습하기": [
             st.Page("dataAi.py", title="인공지능 실험실"),
@@ -62,4 +64,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
