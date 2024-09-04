@@ -28,4 +28,3 @@ elif 데이터확인 == 'df.tail()':
 st.divider()
 
 
-
