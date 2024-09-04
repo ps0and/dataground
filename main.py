@@ -45,6 +45,7 @@ def main():
             st.Page("data01.py", title="1. 데이터 불러오기"),
             st.Page("data02.py", title="2. 데이터프레임 확인하기"),
             st.Page("data03.py", title="3. 열 필터링"),
+            st.Page("data04.py", title="4. 행 필터링"),
             st.Page("preprocessing.py", title="데이터전처리 학습하기"),
             st.Page("dataVisualization.py", title="데이터 운동장"),
         ],
