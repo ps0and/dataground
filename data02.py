@@ -4,11 +4,13 @@ import io
 
 
 st.header("🔧 데이터프레임 확인하기")
-
+st.divider()
+st.write("csv파일로 불러온 데이터는 pandas의 DataFrame 형식으로 저장된다.")
+st.write("각각의 데이터가 어떤 자료형으로 저장되었는지? 데이터의 개수는 몇개인지 확인하는 과정이 필요하다.")
 df = pd.read_csv('./data/축구선수(kaggle).csv')
 
 st.subheader("코드")
-st.code("df.info()")
+st.code("df.info()", language='python')
 
 st.subheader("실행결과")
 
@@ -27,7 +29,7 @@ st.divider()
 st.header("🎉 컬럼명 확인하기")
 
 st.subheader("코드")
-st.code("df.columns")
+st.code("df.columns", language='python')
 
 st.subheader("실행결과")
 st.write(df.columns)
