@@ -46,7 +46,8 @@ def main():
             st.Page("data02.py", title="2. 데이터프레임 확인하기"),
             st.Page("data03.py", title="3. 열 필터링"),
             st.Page("data04.py", title="4. 행 필터링"),
-            st.Page("data05.py", title="5. 결측치 처리")
+            st.Page("data05.py", title="5. 결측치 확인"),
+            st.Page("data06.py", title="6. 결측치 처리")
         ],
         "데이터 실습하기" :[
             st.Page("dataVisualization.py", title="데이터 운동장")
