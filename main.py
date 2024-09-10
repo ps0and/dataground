@@ -36,6 +36,10 @@ def main():
     fontRegistered()
 
     pages = {
+        "로그인":[
+            st.Page("login.py", title="로그인"),
+            st.Page("register.py", title="회원가입")
+        ],
         "알아보기":[
             st.Page("tutorial1.py", title="시작하기"),
             st.Page("tutorial2.py", title="데이터 분석이란?"),
