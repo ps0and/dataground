@@ -34,27 +34,35 @@ def setPageInfo():
 def main():
     setPageInfo()
     fontRegistered()
-
     pages = {
-        "로그인":[
-            st.Page("login.py", title="로그인"),
-            st.Page("register.py", title="회원가입")
-        ],
-        "알아보기":[
-            st.Page("tutorial1.py", title="시작하기"),
-            st.Page("tutorial2.py", title="데이터 분석이란?"),
-            st.Page("tutorial3.py", title="데이터 전처리란?")
-        ],
-        "데이터 학습하기": [            
+        "데이터 전처리": [            
             st.Page("data01.py", title="1. 데이터 불러오기"),
-            st.Page("data02.py", title="2. 데이터프레임 확인하기"),
+            st.Page("data02.py", title="2. 데이터 확인"),
             st.Page("data03.py", title="3. 열 필터링"),
             st.Page("data04.py", title="4. 행 필터링"),
             st.Page("data05.py", title="5. 결측치 확인"),
             st.Page("data06.py", title="6. 결측치 처리")
         ],
+        "데이터 분석":[
+            st.Page("analysis01.py", title="1. 평균,중앙,최빈"),
+            st.Page("analysis02.py", title="2. 분산과 표준편차"),
+            st.Page("analysis03.py", title="3. 상관관계")
+        ],
+        "데이터 시각화":[
+            st.Page("graph01.py", title="1. 꺽은선 그래프"),
+            st.Page("graph02.py", title="2. 막대 그래프"),
+            st.Page("graph03.py", title="3. 원 그래프"),
+            st.Page("graph04.py", title="4. 히스토그램")
+        ],        
         "데이터 실습하기" :[
             st.Page("dataVisualization.py", title="데이터 운동장")
+        ],
+        "인공지능 데이터 분석 기법":
+        [
+            st.Page("ai1.py", title="1. 회귀분석"),
+            #분류분석(로지스틱 회귀, k-NN)
+            #클러스터링(K-Means, 계층적 군집화)
+            #시계열 분석
         ],
         "인공지능 학습하기": [
             st.Page("dataAi.py", title="인공지능 실험실"),
@@ -62,7 +70,7 @@ def main():
         ],
     }
 
-    pg = st.navigation(pages)
+    pg = st.navigation(pages)    
     pg.run()
 
 

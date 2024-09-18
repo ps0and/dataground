@@ -1,5 +1,7 @@
 import streamlit as st
 import pandas as pd
+from streamlit_ace import st_ace, KEYBINDINGS, LANGUAGES, THEMES
+
 
 st.header("🔧 열 필터")
 st.divider()
@@ -23,7 +25,22 @@ st.write("데이터프레임의 short_name, age, overall, nationality_name 4개�
 
 # 사용자 코드 입력 받기
 df_column_filter=''
-code = st.text_area("열 필터를 위한 코드를 작성하고 Ctrl+Enter를 누르세요", '''df_column_filter = df''')
+# code = st.text_area("열 필터를 위한 코드를 작성하고 Ctrl+Enter를 누르세요", '''df_column_filter = df''')
+
+code = st_ace(
+    placeholder="코드를 작성하세요.",
+    language="python",
+    theme="twilight",
+    keybinding="vscode",
+    font_size=14,
+    tab_size=4,               
+    min_lines=3,
+    show_gutter=True,
+    value = '''df_column_filter = df'''         
+)
+
+
+
 
 # 기본값으로 df_column_filter를 빈 문자열로 설정
 
@@ -51,3 +68,14 @@ except Exception as e:
 # 실행 결과 출력
 st.subheader("실행결과 출력")
 st.write(df_column_filter)
+
+st.divider()
+c1, c2, c3 = st.columns([1,5,1])
+prev_btn = c1.button("이전")
+next_btn = c3.button("다음")
+
+if prev_btn:
+    st.switch_page("data02.py")
+
+if next_btn:
+    st.switch_page("data04.py")

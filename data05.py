@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+from streamlit_ace import st_ace, KEYBINDINGS, LANGUAGES, THEMES
 
 #페이지 제목
 st.header("🎬 결측치 확인")
@@ -44,7 +45,19 @@ c1.subheader("데이터")
 c1.write(data)
 
 c2.subheader("결측치 확인하기")
-code = c2.text_area("data변수의 DataFrame의 결측치를 확인하는 코드를 작성하고 Ctrl+Enter를 누르세요", '''data''')
+
+with c2:    
+    code = st_ace(
+        placeholder="코드를 작성하세요.",
+        language="python",
+        theme="twilight",
+        keybinding="vscode",
+        font_size=14,
+        tab_size=4,               
+        min_lines=3,
+        show_gutter=True,
+        value = '''data'''         
+    )
 
 
 # exec 실행 시 직접 결과를 출력 (예외 처리 추가)
@@ -61,7 +74,7 @@ result = data.copy()
 
 
 if code == 'data':
-    c2.warning("Ctrl+Enter를 눌러서 프로그램을 실행하세요.")
+    pass
 elif code == 'data.isnull().sum()':
     c2.success("정답입니다!!!")    
     c2.balloons()
@@ -70,3 +83,15 @@ else:
 c2.write("실행결과")
 code = "st.write("+code+")"
 exec(code)
+
+
+st.divider()
+c1, c2, c3 = st.columns([1,5,1])
+prev_btn = c1.button("이전")
+next_btn = c3.button("다음")
+
+if prev_btn:
+    st.switch_page("data04.py")
+
+if next_btn:
+    st.switch_page("data06.py")

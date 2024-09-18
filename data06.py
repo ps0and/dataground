@@ -53,3 +53,15 @@ df_mean = df
 median = df_mean['나이'].median()
 df_mean.['나이'].fillna(median, inplace=True)""", language='python')
 c4.write(df_median)
+
+
+st.divider()
+c1, c2, c3 = st.columns([1,5,1])
+prev_btn = c1.button("이전")
+next_btn = c3.button("다음")
+
+if prev_btn:
+    st.switch_page("data05.py")
+
+if next_btn:
+    st.switch_page("analysis01.py")

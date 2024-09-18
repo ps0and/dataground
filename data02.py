@@ -33,3 +33,15 @@ st.code("df.columns", language='python')
 
 st.subheader("실행결과")
 st.write(df.columns)
+
+
+st.divider()
+c1, c2, c3 = st.columns([1,5,1])
+prev_btn = c1.button("이전")
+next_btn = c3.button("다음")
+
+if prev_btn:
+    st.switch_page("data01.py")
+
+if next_btn:
+    st.switch_page("data03.py")

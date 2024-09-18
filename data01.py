@@ -25,6 +25,21 @@ if 데이터확인 == 'df.head()':
     st.dataframe(df.head())
 elif 데이터확인 == 'df.tail()':
     st.write(df.tail())
+
+
+
+
+
+
 st.divider()
+c1, c2, c3 = st.columns([1,5,1])
+# prev_btn = c1.button("이전")
+next_btn = c3.button("다음")
+
+# if prev_btn:
+#     st.switch_page("tutorial3.py")
+
+if next_btn:
+    st.switch_page("data02.py")
 
 
