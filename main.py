@@ -34,12 +34,16 @@ def setPageInfo():
 def main():
     setPageInfo()
     fontRegistered()
+    
     pages = {
+        "":[
+            st.Page("intro.py", title="처음으로")
+        ],
         "데이터 전처리": [            
             st.Page("data01.py", title="1. 데이터 불러오기"),
             st.Page("data02.py", title="2. 데이터 확인"),
-            st.Page("data03.py", title="3. 열 필터링"),
-            st.Page("data04.py", title="4. 행 필터링"),
+            st.Page("data03.py", title="3. 열 추출"),
+            st.Page("data04.py", title="4. 행 추출"),
             st.Page("data05.py", title="5. 결측치 확인"),
             st.Page("data06.py", title="6. 결측치 처리")
         ],
@@ -49,17 +53,17 @@ def main():
             st.Page("analysis03.py", title="3. 상관관계")
         ],
         "데이터 시각화":[
-            st.Page("graph01.py", title="1. 꺽은선 그래프"),
-            st.Page("graph02.py", title="2. 막대 그래프"),
-            st.Page("graph03.py", title="3. 원 그래프"),
-            st.Page("graph04.py", title="4. 히스토그램")
+            st.Page("graph01.py", title="📈 꺾은선 그래프"),
+            st.Page("graph02.py", title="📊 막대 그래프"),
+            st.Page("graph03.py", title="🍩 원 그래프"),
+            st.Page("graph04.py", title="📊 히스토그램")
         ],        
         "데이터 실습하기" :[
-            st.Page("dataVisualization.py", title="데이터 운동장")
+            st.Page("dataVisualization.py", title="🧫데이터 실험실")
         ],
         "인공지능 학습하기": [
-            st.Page("dataAi.py", title="인공지능 실험실"),
-            st.Page("playground.py", title="인공지능 놀이터"),
+            st.Page("dataAi.py", title="🧪인공지능 실험실"),
+            st.Page("playground.py", title="🎠인공지능 놀이터"),
         ],
     }
 

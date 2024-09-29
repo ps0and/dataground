@@ -16,24 +16,12 @@ df_median = df.copy()
 st.subheader("데이터 확인하기")
 st.write(df)
 st.subheader("결측치 처리하기")
-c1, c2, c3, c4 = st.columns(4)
+c1, c3, c4 = st.columns(3)
 
 c1.write("1. 결측 데이터 제거")
-df_drop = df_drop.dropna()
-c1.code("df_drop = df.dropna()")
+df_drop.dropna(inplace=True)
+c1.code("df_drop.dropna(inplace=True)")
 c1.write(df_drop)
-
-
-c2.write("2. 특정 값으로 대체")
-
-
-df_value['나이'].fillna(0, inplace=True)
-c2.code("""
-df_value = df
-value = 0
-df_value.['나이'].fillna(value, inplace=True)""", language='python')
-c2.write(df_value)
-
 
 
 c3.write("3. 평균값으로 대체")

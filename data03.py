@@ -3,14 +3,14 @@ import pandas as pd
 from streamlit_ace import st_ace, KEYBINDINGS, LANGUAGES, THEMES
 
 
-st.header("🔧 열 필터")
+st.header("🔧 열 추출")
 st.divider()
 
 # CSV 파일에서 데이터프레임 불러오기
 df = pd.read_csv('./data/축구선수(kaggle).csv')
 df2 = df[['short_name', 'age', 'overall']]
 
-st.write("데이터 프레임에 너무 많은 열이 포함되어있다. 분석에 필요하지 않는 열을 제거하는 것을 열 필터라고 한다.")
+st.write("데이터 프레임에 너무 많은 열이 포함되어있다. 분석에 필요하지 않는 열을 제거하는 것을 열 추출이라고 한다.")
 st.write("분석에 필요한 열 데이터만 추출해보자.")
 
 st.subheader("코드")
@@ -25,7 +25,7 @@ st.write("데이터프레임의 short_name, age, overall, nationality_name 4개�
 
 # 사용자 코드 입력 받기
 df_column_filter=''
-# code = st.text_area("열 필터를 위한 코드를 작성하고 Ctrl+Enter를 누르세요", '''df_column_filter = df''')
+# code = st.text_area("열 추출를 위한 코드를 작성하고 Ctrl+Enter를 누르세요", '''df_column_filter = df''')
 
 code = st_ace(
     placeholder="코드를 작성하세요.",

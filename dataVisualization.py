@@ -7,7 +7,7 @@ from matplotlib.ticker import MaxNLocator
 
 
 
-st.header('⚽데이터 운동장')
+st.header('🧫데이터 실험실')
 st.subheader("1. 데이터 올리기")
 데이터선택 = st.selectbox("데이터 선택",
                         ['인구(kosis)', '기상관측(기상자료개방포털)', '장애인건강검진(kosis)', '청소년흡연(kosis)', '타이타닉(kaggle)', '파일 올리기'])
@@ -73,6 +73,8 @@ for value in 행항목:
 
 
 for i, value in enumerate(행항목리스트):
+    if value=='':
+        continue
     행str = 행항목[i]+value        
     data = data.query(행str)
     
@@ -109,13 +111,18 @@ if x데이터 == 'index':
     x = data.index
 else:
     x = data[x데이터]
+
+colors_ax1 = ['orange', 'blue', 'green', 'red', 'purple']
+colors_ax2 = ['pink', 'cyan', 'olive', 'brown', 'gray']
+
 if 차트종류 == 'line':
-    for col in y데이터:
-        ax.plot(x, data[col], label=col)  # y데이터의 각 컬럼에 대해 라인을 그리며 레이블 추가
+    for i, col in enumerate(y데이터):
+        ax.plot(x, data[col], label=col, color=colors_ax1[i % len(colors_ax1)])  # y데이터의 각 컬럼에 대해 라인을 그리며 레이블 추가
+    
     if y2데이터:
         ax2 = ax.twinx()
-        for col in y2데이터:
-            ax2.plot(x, data[col], label=col)
+        for i, col in enumerate(y2데이터):
+            ax2.plot(x, data[col], label=col, color=colors_ax2[i % len(colors_ax2)])
         ax2.legend(loc="upper right")
     ax.legend(loc="upper left")  # 범례 추가
 

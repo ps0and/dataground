@@ -3,7 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
 
-st.header("막대 그래프")
+st.header("📊 막대 그래프")
 st.write("막대 그래프는 :red[**데이터의 비교**]를 시각적으로 표현한 그래프입니다. 주로 범주형 데이터나 특정 시점의 데이터를 비교하는 데 유용합니다.")
 st.write("막대 그래프는 여러 데이터 항목의 크기 차이를 직관적으로 보여줄 수 있어 데이터를 쉽게 비교할 수 있습니다.")
 st.write("막대 그래프를 사용하면 지역별 인구현황, 매출 현황 등 데이터의 차이를 명확하게 시각화할 수 있습니다.")

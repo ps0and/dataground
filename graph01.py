@@ -3,7 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
 
-st.header("꺾은선 그래프")
+st.header("📈 꺾은선 그래프")
 st.write("꺾은선 그래프는 :red[**연속적인 데이터**]의 변화를 시각적으로 표현한 그래프로 시간의 흐름에 따른 변화나 추세를 쉽게 파악할 수 있다는 장점이 있다.")
 st.write("꺾은선 그래프를 사용하면 시간에 따른 데이터 변화를 예측하거나 데이터의 변화를 이하하는데 도움이 된다.")
 st.write("주식가격변화, 인구변화, 기온변화등 데이터의 변화를 꺾은선 그래프로 표현하면 데이터의 변화를 쉽게 파악할 수 있다.")

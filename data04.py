@@ -2,13 +2,13 @@ import streamlit as st
 import pandas as pd
 from streamlit_ace import st_ace, KEYBINDINGS, LANGUAGES, THEMES
 
-st.header("🎬 행 필터링")
+st.header("🎬 행 추출")
 st.divider()
-st.write("특정 조건을 만족하는 데이터를 추출하기 위해 행 필터링을 사용한다.")
+st.write("특정 조건을 만족하는 데이터를 추출하기 위해 행 추출을 사용한다.")
 st.write("주어진 조건을 만족하는 데이터를 추출해보자.")
 
 df = pd.read_csv('./data/축구선수(kaggle).csv')
-st.subheader("1. 열 필터링 결과")
+st.subheader("1. 열 추출 결과")
 df = df[['short_name', 'age', 'overall','nationality_name']]
 
 st.write(df)
