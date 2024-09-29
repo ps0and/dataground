@@ -19,8 +19,8 @@ def fontRegistered():
 
 def setPageInfo():
     st.set_page_config(
-        page_title="데이터운동장",
-        page_icon="⚽",
+        page_title="데이터 분석 AI",
+        page_icon="💻",
         layout="wide",
         initial_sidebar_state="expanded",
         menu_items={
@@ -59,7 +59,7 @@ def main():
             st.Page("graph04.py", title="📊 히스토그램")
         ],        
         "데이터 실습하기" :[
-            st.Page("dataVisualization.py", title="🧫데이터 실험실")
+            st.Page("dataVisualization.py", title="⚽데이터 운동장")
         ],
         "인공지능 학습하기": [
             st.Page("dataAi.py", title="🧪인공지능 실험실"),

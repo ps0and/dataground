@@ -7,7 +7,7 @@ from matplotlib.ticker import MaxNLocator
 
 
 
-st.header('🧫데이터 실험실')
+st.header('⚽데이터 운동장')
 st.subheader("1. 데이터 올리기")
 데이터선택 = st.selectbox("데이터 선택",
                         ['인구(kosis)', '기상관측(기상자료개방포털)', '장애인건강검진(kosis)', '청소년흡연(kosis)', '타이타닉(kaggle)', '파일 올리기'])

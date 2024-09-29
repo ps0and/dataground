@@ -2,6 +2,8 @@ import streamlit as st
 import pandas as pd
 #데이터 가져오기
 
+st.header("🎈결측치 처리")
+st.divider()
 df = pd.DataFrame({
     '이름': ['지민', '사나', '태연', '민호', '제니'],
     '나이': [28, 22, None, 35, 30],
