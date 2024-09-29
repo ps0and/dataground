@@ -57,13 +57,6 @@ def main():
         "데이터 실습하기" :[
             st.Page("dataVisualization.py", title="데이터 운동장")
         ],
-        "인공지능 데이터 분석 기법":
-        [
-            st.Page("ai1.py", title="1. 회귀분석"),
-            #분류분석(로지스틱 회귀, k-NN)
-            #클러스터링(K-Means, 계층적 군집화)
-            #시계열 분석
-        ],
         "인공지능 학습하기": [
             st.Page("dataAi.py", title="인공지능 실험실"),
             st.Page("playground.py", title="인공지능 놀이터"),
