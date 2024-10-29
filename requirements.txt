@@ -1,3 +1,4 @@
+streamlit >= 1.9.2
 matplotlib
 tensorflow
 pandas
