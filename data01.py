@@ -3,7 +3,7 @@ import pandas as pd
 
 
 
-st.header("🔧 데이터 불러오기")
+st.header(" 데이터 불러오기")
 st.divider()
 st.write("csv파일로 저장된 데이터를 python에서 편집할 수 있도록 불러오자!")
 
