@@ -22,7 +22,7 @@ st.subheader("불러온 데이터 확인하기")
 
 데이터확인 = st.radio("head(), tail()을 선택해 데이터를 확인해보자.", ('df.head()', 'df.tail()' ), horizontal = True)
 if 데이터확인 == 'df.head()':
-    st.dataframe(df.head())
+    st.write(df.head())
 elif 데이터확인 == 'df.tail()':
     st.write(df.tail())
 
